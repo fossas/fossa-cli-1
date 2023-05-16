@@ -4,6 +4,7 @@ module Strategy.Python.SetupPy (
 ) where
 
 import Control.Effect.Diagnostics
+import Control.Monad (void)
 import Data.Text (Text)
 import Data.Void (Void)
 import Effect.ReadFS
@@ -45,11 +46,14 @@ installRequiresParser = do
     end :: Parser Text
     end = symbol "]"
 
+    ignoreBackslash :: Parser ()
+    ignoreBackslash = void $ symbol "\\"
+
     symbol :: Text -> Parser Text
     symbol = L.symbol space
 
     lexeme :: Parser a -> Parser a
-    lexeme = L.lexeme $ L.space space1 (L.skipLineComment "#") empty
+    lexeme = L.lexeme $ L.space (space1 <|> ignoreBackslash) (L.skipLineComment "#") empty
 
     symbol' :: Text -> Parser Text
     symbol' = lexeme . symbol
