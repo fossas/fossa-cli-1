@@ -1,5 +1,6 @@
 module Strategy.Python.SetupPy (
   analyze',
+  installRequiresParser,
 ) where
 
 import Control.Effect.Diagnostics
@@ -29,13 +30,26 @@ installRequiresParser = do
     Nothing -> pure []
     Just _ -> entries <* end
   where
-    prefix = skipManyTill anySingle (symbol "install_requires") *> symbol "=" *> symbol "["
-    entries = (requireSurroundedBy "\"" <|> requireSurroundedBy "\'") `sepEndBy` symbol ","
+    prefix :: Parser Text
+    prefix = skipManyTill anySingle (symbol "install_requires") *> symbol "=" *> (symbol' "[")
+
+    entries :: Parser [Req]
+    entries = entriesParser `sepEndBy` (symbol' ",")
+
+    entriesParser :: Parser Req
+    entriesParser = lexeme (requireSurroundedBy "\"" <|> requireSurroundedBy "\'")
 
     requireSurroundedBy :: Text -> Parser Req
     requireSurroundedBy quote = between (symbol quote) (symbol quote) requirementParser
 
+    end :: Parser Text
     end = symbol "]"
 
     symbol :: Text -> Parser Text
     symbol = L.symbol space
+
+    lexeme :: Parser a -> Parser a
+    lexeme = L.lexeme $ L.space space1 (L.skipLineComment "#") empty
+
+    symbol' :: Text -> Parser Text
+    symbol' = lexeme . symbol

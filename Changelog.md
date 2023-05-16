@@ -1,6 +1,9 @@
 # FOSSA CLI Changelog
 
 <!-- - title: description ([#](https://github.com/fossas/fossa-cli/pull/#)) -->
+## v3.7.10
+- Setup.py: Fixes an defect with `setup.py` parser, caused by failing to account for line comments. ([#1191](https://github.com/fossas/fossa-cli/pull/1191))
+
 ## v3.7.9
 - License Scanning: Add support for "full file uploads" for CLI-side license scans. ([#1181](https://github.com/fossas/fossa-cli/pull/1181))
 
